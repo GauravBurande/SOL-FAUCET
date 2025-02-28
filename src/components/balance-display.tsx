@@ -39,7 +39,9 @@ export const BalanceDisplay: FC = () => {
 
   return (
     <div>
-      <p>{publicKey ? `Balance: ${balance} SOL` : ""}</p>
+      <p>
+        {publicKey ? `Balance: ${balance} SOL` : "Please connect your wallet"}
+      </p>
     </div>
   );
 };
