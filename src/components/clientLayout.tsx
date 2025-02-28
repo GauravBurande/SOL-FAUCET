@@ -7,9 +7,10 @@ import {
 import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
 import { useMemo } from "react";
 import "@solana/wallet-adapter-react-ui/styles.css";
+import { clusterApiUrl } from "@solana/web3.js";
 
 const ClientLayout = ({ children }: { children: React.ReactNode }) => {
-  const endpoint = "http://localhost:8899";
+  const endpoint = clusterApiUrl("devnet");
   const wallets = useMemo(() => [], []);
   return (
     <ConnectionProvider endpoint={endpoint}>
