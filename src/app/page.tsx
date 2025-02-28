@@ -22,7 +22,7 @@ export default function Home() {
     }
 
     try {
-      // onst recipientPubKey = new PublicKey(event.currentTarget.recipient.value);
+      // const recipientPubKey = new PublicKey(event.currentTarget.recipient.value);
       const recipientPubKey = new PublicKey(
         prompt("enter the wallet address: ")!
       );
