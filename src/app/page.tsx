@@ -10,10 +10,12 @@ import {
   TransactionInstruction,
 } from "@solana/web3.js";
 import "@solana/wallet-adapter-react-ui/styles.css";
+import { useState } from "react";
 
 export default function Home() {
   const { connection } = useConnection();
   const { publicKey, sendTransaction } = useWallet();
+  const [TSign, setTSign] = useState("");
 
   const sendSol = async (event: any) => {
     event.preventDefault();
@@ -78,6 +80,7 @@ export default function Home() {
       console.log(
         `You can view your transaction on Solana Explorer at:\nhttps://explorer.solana.com/tx/${signature}?cluster=devnet`
       );
+      setTSign(signature);
     } catch (error) {
       console.error("Transaction Failed:", error);
     }
@@ -98,6 +101,18 @@ export default function Home() {
             Ping the program
           </button>
         </div>
+        {TSign && (
+          <p className="max-w-lg">
+            <a
+              target="_blank"
+              className="underline text-purple-400"
+              href={`https://explorer.solana.com/tx/${TSign}?cluster=devnet`}
+            >
+              Visit explorer.
+            </a>{" "}
+            to View your transaction details.
+          </p>
+        )}
       </main>
     </div>
   );
