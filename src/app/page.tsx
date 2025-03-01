@@ -21,7 +21,7 @@ export default function Home() {
     event.preventDefault();
 
     if (!publicKey) {
-      console.error("Wallet not connected");
+      alert("Wallet not connected");
       return;
     }
 
@@ -53,7 +53,7 @@ export default function Home() {
   const pingProgram = async (event: any) => {
     event.preventDefault();
     if (!connection || !publicKey) {
-      console.log("Wallet not collected or connection not availble.");
+      alert("Wallet not collected or connection not availble.");
     }
 
     try {
@@ -97,18 +97,22 @@ export default function Home() {
 
         <div className="flex gap-4 items-center flex-col sm:flex-row">
           <WalletMultiButton />
-          <button
-            onClick={sendSol}
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-          >
-            Send SOL to someone
-          </button>
-          <button
-            onClick={pingProgram}
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-          >
-            Ping the program
-          </button>
+          {
+            <button
+              onClick={sendSol}
+              className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
+            >
+              Send SOL to someone <p className="px-1">(0.01 SOL)</p>
+            </button>
+          }
+          {
+            <button
+              onClick={pingProgram}
+              className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
+            >
+              Ping the program
+            </button>
+          }
         </div>
         {TSign && (
           <p className="max-w-lg">
