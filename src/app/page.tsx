@@ -41,7 +41,10 @@ export default function Home() {
       transaction.add(sendSolInstruction);
 
       const signature = await sendTransaction(transaction, connection);
-      console.log(`Transaction signature: ${signature}`);
+      console.log(
+        `You can view your transaction on Solana Explorer at:\nhttps://explorer.solana.com/tx/${signature}?cluster=devnet`
+      );
+      setTSign(signature);
     } catch (error) {
       console.error("Transaction failed", error);
     }
@@ -95,6 +98,12 @@ export default function Home() {
         <div className="flex gap-4 items-center flex-col sm:flex-row">
           <WalletMultiButton />
           <button
+            onClick={sendSol}
+            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
+          >
+            Send SOL to someone
+          </button>
+          <button
             onClick={pingProgram}
             className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
           >
@@ -110,7 +119,7 @@ export default function Home() {
             >
               Visit explorer.
             </a>{" "}
-            to View your transaction details.
+            to View your recent transaction details.
           </p>
         )}
       </main>
