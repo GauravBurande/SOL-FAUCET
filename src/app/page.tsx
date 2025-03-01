@@ -75,7 +75,9 @@ export default function Home() {
       transaction.add(instruction);
 
       const signature = await sendTransaction(transaction, connection);
-      console.log("Transaction Signature: ", signature);
+      console.log(
+        `You can view your transaction on Solana Explorer at:\nhttps://explorer.solana.com/tx/${signature}?cluster=devnet`
+      );
     } catch (error) {
       console.error("Transaction Failed:", error);
     }
