@@ -1,20 +1,29 @@
 "use client";
 
+import { ClusterContext } from "@/context/cluster-context";
 import {
   ConnectionProvider,
   WalletProvider,
 } from "@solana/wallet-adapter-react";
 import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
-import { useMemo } from "react";
-import { clusterApiUrl } from "@solana/web3.js";
+import { useMemo, useState } from "react";
 
 const ClientLayout = ({ children }: { children: React.ReactNode }) => {
-  const endpoint = clusterApiUrl("devnet");
+  const [cluster, setCluster] = useState("devnet");
+
+  const devnetEndpoint = `https://solana-devnet.g.alchemy.com/v2/h0t4gAiXQ688wH0kIhPYynqnDOXbqUfA`;
+  const testnetEndpoint = `https://api.testnet.solana.com`;
   const wallets = useMemo(() => [], []);
   return (
-    <ConnectionProvider endpoint={endpoint}>
+    <ConnectionProvider
+      endpoint={cluster === "devnet" ? devnetEndpoint : testnetEndpoint}
+    >
       <WalletProvider wallets={wallets}>
-        <WalletModalProvider>{children}</WalletModalProvider>
+        <WalletModalProvider>
+          <ClusterContext.Provider value={{ cluster, setCluster }}>
+            {children}
+          </ClusterContext.Provider>
+        </WalletModalProvider>
       </WalletProvider>
     </ConnectionProvider>
   );
