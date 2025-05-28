@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import {
   Select,
   SelectTrigger,
@@ -15,25 +15,43 @@ import {
   DropdownMenuContent,
 } from "@/components/ui/dropdown-menu";
 import { ClusterContext } from "@/context/cluster-context";
+import { useConnection, useWallet } from "@solana/wallet-adapter-react";
+import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
+import { ExternalLinkIcon } from "lucide-react";
+import Link from "next/link";
 
 const CLUSTERS = ["devnet", "testnet"];
 
 const AMOUNTS = ["0.1", "0.5", "1", "1.5"];
 
 export default function Faucet() {
-  const [address, setAddress] = useState("");
-  const [amount, setAmount] = useState("");
+  const [amount, setAmount] = useState("0.5");
+  const [tx, setTx] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const { cluster, setCluster } = useContext(ClusterContext);
+  const { connection } = useConnection();
+  const { publicKey } = useWallet();
 
-  const isDisabled = !address || !amount;
-
-  const handleDropSol = (e: React.FormEvent) => {
+  const isDisabled = !amount || !publicKey;
+  const handleDropSol = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Drop SOL", { cluster, address, amount });
+    try {
+      setIsLoading(true);
+      const tx = await connection.requestAirdrop(
+        new PublicKey(publicKey!),
+        Number(amount) * LAMPORTS_PER_SOL
+      );
+      console.log(tx);
+      setTx(tx);
+    } catch (error) {
+      console.error(error);
+      alert("Error: " + error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  console.log("amount", amount);
   return (
     <div className="max-w-lg mx-auto mt-16 bg-muted/30 rounded-3xl p-12 border border-muted-foreground/10 shadow-lg text-lg">
       <div className="flex items-center justify-between mb-10">
@@ -62,9 +80,9 @@ export default function Faucet() {
       <form onSubmit={handleDropSol}>
         <div className="flex gap-6 mb-8 items-center">
           <Input
+            readOnly
             placeholder="Wallet Address"
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
+            value={publicKey?.toString() || "Please connect your wallet"}
             className="text-lg py-3 px-4 cursor-pointer"
           />
           <DropdownMenu>
@@ -79,7 +97,7 @@ export default function Faucet() {
             <DropdownMenuContent align="end" className="p-3">
               <ToggleGroup
                 type="single"
-                value={amount}
+                value={amount.toString()}
                 onValueChange={setAmount}
                 className="flex gap-3"
               >
@@ -102,9 +120,25 @@ export default function Faucet() {
           className="w-full mt-4 text-lg py-3 px-4 cursor-pointer"
           disabled={isDisabled}
         >
-          Drop SOL
+          {isLoading ? "Dropping SOL..." : "Drop SOL"}
         </Button>
       </form>
+      {tx !== "" && (
+        // <div className="mt-4">
+        //   <Link
+        //     href={`https://explorer.solana.com/tx/${tx}?cluster=${cluster}`}
+        //     target="_blank"
+        //     rel="noopener noreferrer"
+        //     className="text-blue-500 justify-center hover:text-blue-600 flex items-center gap-2"
+        //   >
+        //     View transaction on Solana Explorer
+        //     <ExternalLinkIcon className="w-4 h-4" />
+        //   </Link>
+        // </div>
+        <p className="text-center text-sm mt-2">
+          Airdropped {amount} SOL to {publicKey?.toString()}
+        </p>
+      )}
     </div>
   );
 }
