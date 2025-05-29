@@ -41,7 +41,7 @@ export default function Faucet() {
           setBalance(balance / LAMPORTS_PER_SOL);
         }
       } catch (error) {
-        alert("Error: " + error);
+        alert(error);
         console.error("Error: ", error);
       }
     };
@@ -74,7 +74,7 @@ export default function Faucet() {
       setTx(tx);
     } catch (error) {
       console.error(error);
-      alert("Error: " + error);
+      alert(error);
     } finally {
       setIsLoading(false);
     }
