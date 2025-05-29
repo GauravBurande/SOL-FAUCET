@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import {
   Select,
   SelectTrigger,
@@ -17,8 +17,7 @@ import {
 import { ClusterContext } from "@/context/cluster-context";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
-import { ExternalLinkIcon } from "lucide-react";
-import Link from "next/link";
+import { ExternalLinkIcon, Link } from "lucide-react";
 
 const CLUSTERS = ["devnet", "testnet"];
 
@@ -28,19 +27,48 @@ export default function Faucet() {
   const [amount, setAmount] = useState("0.5");
   const [tx, setTx] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [balance, setBalance] = useState(0);
 
   const { cluster, setCluster } = useContext(ClusterContext);
   const { connection } = useConnection();
   const { publicKey } = useWallet();
 
+  useEffect(() => {
+    const getBalance = async () => {
+      try {
+        if (pubKey) {
+          const balance = await connection.getBalance(pubKey);
+          setBalance(balance / LAMPORTS_PER_SOL);
+        }
+      } catch (error) {
+        alert("Error: " + error);
+        console.error("Error: ", error);
+      }
+    };
+    getBalance();
+  }, [publicKey]);
+
+  let pubKey: PublicKey;
+  if (publicKey) {
+    pubKey = new PublicKey(publicKey);
+  }
   const isDisabled = !amount || !publicKey;
   const handleDropSol = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       setIsLoading(true);
       const tx = await connection.requestAirdrop(
-        new PublicKey(publicKey!),
+        pubKey,
         Number(amount) * LAMPORTS_PER_SOL
+      );
+
+      const latestBlockHash = await connection.getLatestBlockhash();
+      await connection.confirmTransaction(
+        {
+          signature: tx,
+          ...latestBlockHash,
+        },
+        "confirmed"
       );
       console.log(tx);
       setTx(tx);
@@ -53,9 +81,9 @@ export default function Faucet() {
   };
 
   return (
-    <div className="max-w-lg mx-auto mt-16 bg-muted/30 rounded-3xl p-12 border border-muted-foreground/10 shadow-lg text-lg">
+    <div className="w-[19rem] md:min-w-xl mx-auto mt-16 bg-muted/30 rounded-3xl p-12 border border-muted-foreground/10 shadow-lg text-lg">
       <div className="flex items-center justify-between mb-10">
-        <h2 className="text-2xl font-semibold mr-6 select-none">
+        <h2 className="md:text-2xl font-semibold mr-6 select-none">
           Request Airdrop
         </h2>
         <div className="ml-6">
@@ -123,21 +151,20 @@ export default function Faucet() {
           {isLoading ? "Dropping SOL..." : "Drop SOL"}
         </Button>
       </form>
+      {balance !== 0 && (
+        <p className="text-center mt-5">Your current balance is: {balance}</p>
+      )}
       {tx !== "" && (
-        // <div className="mt-4">
-        //   <Link
-        //     href={`https://explorer.solana.com/tx/${tx}?cluster=${cluster}`}
-        //     target="_blank"
-        //     rel="noopener noreferrer"
-        //     className="text-blue-500 justify-center hover:text-blue-600 flex items-center gap-2"
-        //   >
-        //     View transaction on Solana Explorer
-        //     <ExternalLinkIcon className="w-4 h-4" />
-        //   </Link>
-        // </div>
-        <p className="text-center text-sm mt-2">
-          Airdropped {amount} SOL to {publicKey?.toString()}
-        </p>
+        <div className="mt-4">
+          <Link
+            href={`https://explorer.solana.com/tx/${tx}?cluster=${cluster}`}
+            target="_blank"
+            className="text-blue-500 justify-center hover:text-blue-600 flex items-center gap-2"
+          >
+            View transaction on Solana Explorer
+            <ExternalLinkIcon className="w-4 h-4" />
+          </Link>
+        </div>
       )}
     </div>
   );
