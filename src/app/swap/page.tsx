@@ -6,7 +6,7 @@ import { ArrowDown, ExternalLinkIcon, Rocket, Wallet } from "lucide-react";
 import Image from "next/image";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { debounce, formatAmount } from "@/lib/utils";
+import { formatAmount } from "@/lib/utils";
 import { VersionedTransaction } from "@solana/web3.js";
 import Link from "next/link";
 
@@ -59,9 +59,7 @@ export default function Swap() {
 
   useEffect(() => {
     if (balances[fromTokenSymbol] !== 0) {
-      // todo: this debounce is definitely not working
-      const debounced = debounce(getOrder, 0.5);
-      debounced();
+      getOrder();
     }
   }, [fromAmount]);
 
