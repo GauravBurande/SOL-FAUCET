@@ -5,9 +5,9 @@ import { Input } from "@/components/ui/input";
 import { ArrowDown, Rocket, Wallet } from "lucide-react";
 import Image from "next/image";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
-import { useConnection, useWallet } from "@solana/wallet-adapter-react";
-import { debounce } from "@/lib/utils";
-import { sendAndConfirmTransaction, VersionedTransaction } from "@solana/web3.js";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { debounce, formatAmount } from "@/lib/utils";
+import { VersionedTransaction } from "@solana/web3.js";
 
 const TOKENS = [
   {
@@ -28,17 +28,6 @@ const TOKENS = [
   },
 ];
 
-function formatAmount(
-  amount: string | number,
-  decimals: number,
-  precision = 6
-) {
-  if (!amount) return "0";
-  return (Number(amount) / 10 ** decimals)
-    .toFixed(precision)
-    .replace(/\.?0+$/, "");
-}
-
 export default function Swap() {
   const [fromToken, setFromToken] = useState(TOKENS[0]);
   const [toToken, setToToken] = useState(TOKENS[1]);
@@ -57,9 +46,7 @@ export default function Swap() {
   const fromTokenSymbol = fromToken.balanceKey;
   const toTokenSymbol = toToken.balanceKey;
 
-  const { publicKey } = useWallet();
-  const wallet = useWallet();
-  const connection = useConnection();
+  const { publicKey, signTransaction } = useWallet();
   const taker = publicKey?.toBase58();
 
   useEffect(() => {
@@ -95,7 +82,6 @@ export default function Swap() {
     }
   };
 
-  let swapTransaction: Base64URLString | null = null;
   const getOrder = async () => {
     setOrder(null);
     try {
@@ -108,9 +94,7 @@ export default function Swap() {
       const url = `https://lite-api.jup.ag/ultra/v1/order?inputMint=${fromToken.mint}&outputMint=${toToken.mint}&amount=${amountLamports}&taker=${taker}`;
       const res = await fetch(url);
       const data = await res.json();
-      console.log("order; ", data);
       setOrder(data);
-      swapTransaction = data.transaction;
       setToAmount(formatAmount(data.outAmount, toToken.decimals, 6));
     } catch (e) {
       setOrder(null);
@@ -120,20 +104,53 @@ export default function Swap() {
   };
 
   const handleSwap = async () => {
+    console.log("handleSwap");
     setIsSwapping(true);
     try {
-      if (swapTransaction) {
-        const txBytes = Buffer.from(swapTransaction, "base64");
+      if (!signTransaction) {
+        alert("Please connect your wallet");
+        return;
+      }
+      const swapTxn = order.transaction;
+      const requestId = order.requestId;
+      console.log("swptxn", swapTxn);
+      console.log("reqid", requestId);
+      if (swapTxn && requestId) {
+        const txBytes = Buffer.from(swapTxn, "base64");
         const transaction = VersionedTransaction.deserialize(txBytes);
-        console.log(transaction)
+        console.log("transaction", transaction);
 
-        transaction.sign([wallet])s
-        
-        const tx = await sendAndConfirmTransaction(connection, transaction, [
-          wallet,
-        ]);
-        // const tx = await transaction.sendAndConfirm();
-        console.log("tx; ", tx);
+        const signedTx = await signTransaction(transaction);
+        const signedTxBs64 = Buffer.from(signedTx.serialize()).toString(
+          "base64"
+        );
+        // todo: learn about V1 transactions
+        const executeResponse = await (
+          await fetch("https://lite-api.jup.ag/ultra/v1/execute", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              signedTransaction: signedTxBs64,
+              requestId,
+            }),
+          })
+        ).json();
+
+        if (executeResponse.status === "Success") {
+          console.log(
+            "Swap successful:",
+            JSON.stringify(executeResponse, null, 2)
+          );
+          console.log(`https://solscan.io/tx/${executeResponse.signature}`);
+        } else {
+          console.error(
+            "Swap failed:",
+            JSON.stringify(executeResponse, null, 2)
+          );
+          console.log(`https://solscan.io/tx/${executeResponse.signature}`);
+        }
       }
     } catch (e) {
       console.log(e);
@@ -233,7 +250,7 @@ export default function Swap() {
           <Button
             variant="ghost"
             size="icon"
-            className="rounded-full bg-foreground/10 hover:bg-foreground/20"
+            className="rounded-full bg-foreground/10 hover:bg-foreground/20 cursor-pointer"
             onClick={handleSwitchTokens}
             aria-label="Switch tokens"
             type="button"
@@ -323,7 +340,7 @@ export default function Swap() {
 
         {/* Swap Button */}
         <Button
-          className="w-full py-3 text-lg font-semibold bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl shadow-lg hover:from-blue-600 hover:to-purple-600"
+          className="w-full py-3 text-lg font-semibold bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl shadow-lg hover:from-blue-600 hover:to-purple-600 cursor-pointer"
           disabled={
             !fromAmount ||
             Number(fromAmount) <= 0 ||
