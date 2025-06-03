@@ -1,4 +1,4 @@
-import { useContext, useEffect, useMemo, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   Select,
   SelectTrigger,
@@ -16,8 +16,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ClusterContext } from "@/context/cluster-context";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
-import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
-import { ExternalLinkIcon, Link } from "lucide-react";
+import {
+  LAMPORTS_PER_SOL,
+  PublicKey,
+  SystemProgram,
+  Transaction,
+} from "@solana/web3.js";
+import { ExternalLinkIcon } from "lucide-react";
+import Link from "next/link";
 
 const CLUSTERS = ["devnet", "testnet"];
 
@@ -31,7 +37,7 @@ export default function Faucet() {
 
   const { cluster, setCluster } = useContext(ClusterContext);
   const { connection } = useConnection();
-  const { publicKey } = useWallet();
+  const { publicKey, sendTransaction } = useWallet();
 
   useEffect(() => {
     const getBalance = async () => {
@@ -80,6 +86,22 @@ export default function Faucet() {
     }
   };
 
+  async function sendTokens(e: React.FormEvent) {
+    console.log("sending toen");
+    e.preventDefault();
+    const transaction = new Transaction();
+    transaction.add(
+      SystemProgram.transfer({
+        fromPubkey: pubKey,
+        toPubkey: new PublicKey("<YOUR_PUBLIC_KEY_HERE>"),
+        lamports: 0.1 * LAMPORTS_PER_SOL,
+      })
+    );
+
+    const signature = await sendTransaction(transaction, connection);
+    console.log(signature);
+    alert("Sent " + amount + " SOL to " + "<YOUR_PUBLIC_KEY_HERE>");
+  }
   return (
     <div className="w-[19rem] md:min-w-xl mx-auto mt-16 bg-muted/30 rounded-3xl p-12 border border-muted-foreground/10 shadow-lg text-lg">
       <div className="flex items-center justify-between mb-10">
@@ -157,7 +179,7 @@ export default function Faucet() {
       {tx !== "" && (
         <div className="mt-4">
           <Link
-            href={`https://explorer.solana.com/tx/${tx}?cluster=${cluster}`}
+            href={`https://explorer.solana.com/tx/${"32VNaVtCWWz4HYZ3wHLYRJhmKZoS22M9Fj7gagy1ExRhW7EVteVRVyL1Y86Y4rAK6hbNReEFup6kgqyQEB2vdan"}?cluster=${cluster}`}
             target="_blank"
             className="text-blue-500 justify-center hover:text-blue-600 flex items-center gap-2"
           >

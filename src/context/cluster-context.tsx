@@ -1,6 +1,4 @@
-// create a context for the cluster like devnet or testnet
-
-import { createContext, useState } from "react";
+import { createContext } from "react";
 
 export const ClusterContext = createContext({
   cluster: "devnet",

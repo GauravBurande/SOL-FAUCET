@@ -2,7 +2,6 @@
 import Faucet from "@/components/faucet";
 import Footer from "@/components/footer";
 import Header from "@/components/header";
-import "@solana/wallet-adapter-react-ui/styles.css";
 
 export default function Home() {
   return (
