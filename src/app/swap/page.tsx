@@ -299,8 +299,8 @@ export default function Swap() {
             1 {fromToken.symbol} ≈ {rate ? rate : "--"} {toToken.symbol}
           </span>
           <div>
-            This uses Jup's Ultra API optimizing for the transaction's success
-            rate and slippage.
+            This uses Jup&apos;s Ultra API optimizing for the transaction&apos;s
+            success rate and slippage.
           </div>
         </div>
 
