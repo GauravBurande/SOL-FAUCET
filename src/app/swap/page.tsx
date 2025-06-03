@@ -239,7 +239,7 @@ export default function Swap() {
             <Button
               variant="ghost"
               size="sm"
-              className="text-xs text-blue-400 px-2 py-1"
+              className="text-xs cursor-pointer text-blue-400 px-2 py-1"
               onClick={handleMax}
               type="button"
               disabled={isSwapping}
@@ -352,9 +352,8 @@ export default function Swap() {
             Number(fromAmount) > balances[fromTokenSymbol]
           }
           onClick={handleSwap}
-          type="button"
         >
-          {isSwapping ? "Swapping..." : `Swap`}
+          {publicKey ? (isSwapping ? "Swapping..." : `Swap`) : "Connect Wallet"}
         </Button>
         {solscanLink && (
           <div className="mt-4 w-fit mx-auto text-center">
