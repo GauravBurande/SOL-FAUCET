@@ -2,12 +2,13 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ArrowDown, Rocket, Wallet } from "lucide-react";
+import { ArrowDown, ExternalLinkIcon, Rocket, Wallet } from "lucide-react";
 import Image from "next/image";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { debounce, formatAmount } from "@/lib/utils";
 import { VersionedTransaction } from "@solana/web3.js";
+import Link from "next/link";
 
 const TOKENS = [
   {
@@ -35,6 +36,9 @@ export default function Swap() {
   const [toAmount, setToAmount] = useState("");
   const [isSwapping, setIsSwapping] = useState(false);
   const [order, setOrder] = useState<any>(null);
+  const [solscanLink, setSolscanLink] = useState(
+    "https://solscan.io/tx/4YQqdnTZqPyetKcwXL4ZDKHk5QV1GNnWcYyrvNq88NBhxUrGtcSmaemZ7wqYWHxxh8NRdpsmxov2aCsfhZHHdmKc"
+  );
 
   const initialBalances = {
     [TOKENS[0].balanceKey]: 0,
@@ -143,12 +147,15 @@ export default function Swap() {
             "Swap successful:",
             JSON.stringify(executeResponse, null, 2)
           );
-          console.log(`https://solscan.io/tx/${executeResponse.signature}`);
+          const explorerLink = `https://solscan.io/tx/${executeResponse.signature}`;
+          setSolscanLink(explorerLink);
+          console.log(explorerLink);
         } else {
           console.error(
             "Swap failed:",
             JSON.stringify(executeResponse, null, 2)
           );
+          alert("The swp failed! Your tokens are safe though.");
           console.log(`https://solscan.io/tx/${executeResponse.signature}`);
         }
       }
@@ -198,7 +205,7 @@ export default function Swap() {
       <div className="absolute top-4 right-4">
         <WalletMultiButton />
       </div>
-      <div className="bg-foreground/10 backdrop-blur-md rounded-2xl shadow-xl p-8 min-w-xl">
+      <div className="bg-foreground/10 backdrop-blur-md rounded-2xl shadow-xl p-8 w-lg max-w-xl">
         <h2 className="text-xl font-bold flex items-center gap-2 mb-6">
           <Rocket />
           Instant Swap
@@ -352,6 +359,19 @@ export default function Swap() {
         >
           {isSwapping ? "Swapping..." : `Swap`}
         </Button>
+        {solscanLink && (
+          <div className="mt-4 w-fit mx-auto text-center">
+            <Link
+              href={solscanLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 underline flex gap-2 items-center"
+            >
+              View Swap Transaction on Solscan
+              <ExternalLinkIcon className="w-4 h-4" />
+            </Link>
+          </div>
+        )}
       </div>
     </div>
   );
