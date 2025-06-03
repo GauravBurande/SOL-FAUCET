@@ -100,6 +100,7 @@ export default function Swap() {
     } catch (e) {
       setOrder(null);
       setToAmount("");
+      console.log("error: ", e);
       alert("Error fetching order");
     }
   };
@@ -184,7 +185,6 @@ export default function Swap() {
     setToAmount("");
   };
 
-  // Calculate rate if order exists
   let rate = "";
   if (order && order.inAmount && order.outAmount) {
     const inAmt = Number(order.inAmount) / 10 ** fromToken.decimals;
