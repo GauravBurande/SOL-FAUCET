@@ -36,9 +36,7 @@ export default function Swap() {
   const [toAmount, setToAmount] = useState("");
   const [isSwapping, setIsSwapping] = useState(false);
   const [order, setOrder] = useState<any>(null);
-  const [solscanLink, setSolscanLink] = useState(
-    "https://solscan.io/tx/4YQqdnTZqPyetKcwXL4ZDKHk5QV1GNnWcYyrvNq88NBhxUrGtcSmaemZ7wqYWHxxh8NRdpsmxov2aCsfhZHHdmKc"
-  );
+  const [solscanLink, setSolscanLink] = useState<string | null>();
 
   const initialBalances = {
     [TOKENS[0].balanceKey]: 0,
@@ -61,6 +59,7 @@ export default function Swap() {
 
   useEffect(() => {
     if (balances[fromTokenSymbol] !== 0) {
+      // todo: this debounce is definitely not working
       const debounced = debounce(getOrder, 0.5);
       debounced();
     }
@@ -201,7 +200,7 @@ export default function Swap() {
   const routePlan = order?.routePlan || [];
 
   return (
-    <div className="flex justify-center items-center min-h-screen">
+    <div className="flex flex-col justify-center items-center min-h-screen">
       <div className="absolute top-4 right-4">
         <WalletMultiButton />
       </div>
@@ -372,6 +371,23 @@ export default function Swap() {
             </Link>
           </div>
         )}
+      </div>
+      <div className="mt-8 text-center text-foreground/80 text-base">
+        <p>
+          <span className="font-semibold">Safe to use:</span> This swap
+          interface is non-custodial and open source. You can review the source
+          code on{" "}
+          <Link
+            href="https://github.com/GauravBurande/SOL-FAUCET"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 underline inline-flex items-center gap-1"
+          >
+            GitHub
+            <ExternalLinkIcon className="w-4 h-4" />
+          </Link>
+          .
+        </p>
       </div>
     </div>
   );
